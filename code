@@ -1,9 +1,66 @@
+require 'mathn'
 
-print "The sum of all the multiples of 3 and 5 below below 1000 is:"
-total = 0
-0.upto(999).each do |x|
-  total += x if (x % 3 == 0 || x % 5 == 0)
+
+# Here's an example of how this works. Say we're finding the sum of the
+# multiples of 3 or 5 below 16.
+#
+# Multiples of 3 below 16 are 3, 6, 9, 12, and 15
+# Multiples of 5 below 16 are 5, 10, and 15.
+#
+# To calculate The sum of multiples of 3, we notice that
+#     3 + 6 + 9 + 12 + 15 = 3(1 + 2 + 3 + 4 + 5)
+# Which we see is just an arithmatic series that we can calculate
+# very quickly because (1 + 2 + .. + N) = (N) * (N + 1) / 2.
+# Now the question is, how do we calculate N? It is basically N = 16/3,
+# but because we are only looking for the sum below 16, we subtract one from
+# the numerator and then take the floor of the result, so we end up with
+# the count of whole number increments of 3 below 16 via N = floor((16 - 1)/3).
+#
+# So with this we can calculate the sum of multiples of 3 or 5 below 16 and then
+# sum them, but we'll have ended up double counting a few numbers, in this case
+# we will have counted 15 twice. To fix this, we need to subtract out all
+# numbers that are divisible by both 3 and 5 below 16. In this case, the only number
+# is 15, but it is calculated in exactly the same way as the other two sums were.
+#
+# Tyler: Your solution was nice and simple. I like how you did it in very few lines
+# of code. The question you'll have to ask in some situations however is,
+# `does it matter how fast this thing runs?`. You'll notice in your solution
+# you had to loop over 1000 numbers to calculate your answer. If I asked the
+# same question, except changed 1000 to 1,000,000,000,000, how much more time
+# would your solution take? You'd have to loop over 1,000,000,000,000 numbers.
+# The benefit of mine is that it will take no more time to calculate if that
+# upper bound drastically increases, because all I'm ever doing is adding,
+# subtracting, etc., never looping. My solution isn't any better or worse
+# independent of the context with which this code might be applied. We
+# each optimized different things.
+#
+#
+# Sometimes simplicity is way more important than efficiency, sometimes
+# the other way around. There is definitely no right answer. You'll have
+# to put on your engineer hat and ask often: "What exactly am I trying to optimize
+# here?" Very often code simplicity is a very good answer. Sometimes its not.
+# All depends.
+
+# 1 + 2 + ... + N = N * (N + 1)/2
+def sum_one_to_n(n)
+  n * (n + 1) / 2
 end
 
-puts total
+# The number of multiples of 3 below 10 is 3: 1, 3, and 9.
+def multiples_of_k_below_n(k, n)
+  ((n - 1)/k).floor
+end
 
+def multiplier(k, n)
+  sum_one_to_n(multiples_of_k_below_n(k, n))
+end
+
+m1 = 3
+m2 = 5
+N = 1000
+
+double_count_factor = m1.lcm(m2)
+
+sum = m1 * multiplier(m1, N) + m2 * multiplier(m2, N) - double_count_factor * multiplier(double_count_factor, N)
+
+puts "the sum of multiples of #{m1} and #{m2} below #{N} is #{sum}"
